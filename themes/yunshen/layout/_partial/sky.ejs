@@ -1,0 +1,12 @@
+<%# 升落、呼吸、月相分别放在独立层，持续动画不会覆盖时间计算的变换。 %>
+<div class="sky-track" aria-hidden="true">
+  <div class="sky-breathe">
+    <div class="celestial sun"></div>
+    <svg class="celestial moon" viewBox="0 0 100 100" fill="none">
+      <defs><clipPath id="moon-lit"><path class="moon-clip" d="M50 5A45 45 0 1 1 50 95A45 45 0 1 1 50 5Z"/></clipPath></defs>
+      <circle class="moon-shade" cx="50" cy="50" r="45"/>
+      <path class="moon-phase" d="M50 5A45 45 0 1 1 50 95A45 45 0 1 1 50 5Z"/>
+      <g class="moon-craters" clip-path="url(#moon-lit)"><circle cx="35" cy="32" r="8"/><circle cx="65" cy="58" r="11"/><circle cx="39" cy="73" r="5"/><circle cx="66" cy="26" r="4"/></g>
+    </svg>
+  </div>
+</div>

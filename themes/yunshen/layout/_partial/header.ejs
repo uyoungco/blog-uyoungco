@@ -1,0 +1,33 @@
+<header class="site-header">
+  <div class="header-inner wrap">
+    <a class="brand" href="<%- url_for('/') %>" aria-label="<%= config.title %> · 返回首页">
+      <span class="seal brand-seal" aria-hidden="true"><%= theme.brand.seal %></span>
+      <span class="brand-copy"><strong><%= config.title %></strong><small><%= theme.brand.note %></small></span>
+    </a>
+    <nav class="main-nav" id="main-nav" aria-label="主导航">
+      <% theme.menu.forEach(item => {
+        const route = item.path.replace(/^\//, '');
+        const current = route ? (page.path || '').startsWith(route) : is_home();
+      %>
+        <a class="nav-link<%= current ? ' is-current' : '' %>" href="<%- url_for(item.path) %>"<% if (current) { %> aria-current="page"<% } %>>
+          <span><%= item.name %></span><small><%= item.plain %></small>
+        </a>
+      <% }); %>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-button search-trigger" type="button" aria-label="搜索文章" title="搜索文章（/）"><%- yun_icon('search') %></button>
+      <%# 三态主题选择：无脚本时隐藏控件，CSS 仍可跟随设备明暗。 %>
+      <div class="theme-control" hidden>
+        <button class="icon-button theme-toggle" type="button" aria-label="切换主题" aria-haspopup="menu" aria-expanded="false" aria-controls="theme-menu" title="主题：跟随设备">
+          <span data-theme-icon="auto"><%- yun_icon('monitor') %></span><span data-theme-icon="light" hidden><%- yun_icon('sun') %></span><span data-theme-icon="dark" hidden><%- yun_icon('moon') %></span>
+        </button>
+        <div class="theme-menu" id="theme-menu" role="menu" aria-label="页面主题" hidden>
+          <% [['auto', '跟随设备', 'monitor'], ['light', '浅色', 'sun'], ['dark', '深色', 'moon']].forEach(([mode, label, icon]) => { %>
+          <button type="button" role="menuitemradio" aria-checked="<%= mode === 'auto' %>" data-theme-choice="<%= mode %>" tabindex="-1"><%- yun_icon(icon) %><span><%= label %><% if (mode === 'auto') { %><small class="theme-auto-status"></small><% } %></span><span class="theme-check" aria-hidden="true">✓</span></button>
+          <% }); %>
+        </div>
+      </div>
+      <button class="icon-button menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="展开导航"><%- yun_icon('menu') %></button>
+    </div>
+  </div>
+</header>

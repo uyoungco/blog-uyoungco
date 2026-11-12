@@ -1,0 +1,1 @@
+<% if (page.total > 1) { %><nav class="pagination" aria-label="文章分页"><%- paginator({ prev_text: '← 前卷', next_text: '后卷 →', mid_size: 1, end_size: 1 }) %><span class="page-note">第 <%= yun_number(page.current) %> 卷 · 共 <%= yun_number(page.total) %> 卷</span></nav><% } %>

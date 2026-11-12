@@ -1,0 +1,28 @@
+<% const homeList = is_home(); %>
+<ol class="post-list<%= homeList ? ' home-post-list' : '' %>">
+  <% posts.each((post, index) => { %>
+  <%# 首页整行进入文章，分类仅展示文字；内页继续保留分类、标签的独立链接。 %>
+  <% if (homeList) { %>
+  <li>
+    <a class="post-row" href="<%- url_for(post.path) %>">
+      <span class="row-number" aria-hidden="true"><%= yun_number(index + 1) %></span>
+      <div class="row-body">
+        <div class="post-meta"><% if (post.categories.length) { %><span class="category-label"><span class="category-dot" aria-hidden="true"></span><%= post.categories.first().name %></span><% } %><time datetime="<%= date(post.date, 'YYYY-MM-DD') %>"><%= date(post.date, 'YYYY-MM-DD') %></time></div>
+        <h3><%= post.title %></h3><p><%= yun_summary(post) %></p>
+      </div>
+      <span class="row-go"><span class="read-time"><%= yun_minutes(post) %> 分</span><span class="row-arrow" aria-hidden="true">→</span></span>
+    </a>
+  </li>
+  <% } else { %>
+  <li class="post-row">
+    <span class="row-number" aria-hidden="true"><%= yun_number(index + 1) %></span>
+    <div class="row-body"><div class="post-meta"><% if (post.categories.length) { const category = post.categories.first(); %><a class="category-label" href="<%- url_for(category.path) %>"><span class="category-dot"></span><%= category.name %></a><span class="meta-separator">/</span><% } %><time datetime="<%= date(post.date, 'YYYY-MM-DD') %>"><%= date(post.date, 'YYYY.MM.DD') %></time></div>
+      <h3><a href="<%- url_for(post.path) %>"><%= post.title %></a></h3><p><%= yun_summary(post) %></p>
+      <div class="row-bottom"><div class="post-tags"><% post.tags.limit(3).each(tag => { %><a href="<%- url_for(tag.path) %>"># <%= tag.name %></a><% }); %></div><span class="read-time"><%= yun_minutes(post) %> 分钟</span></div>
+    </div>
+    <a class="row-arrow" href="<%- url_for(post.path) %>" aria-label="阅读：<%= post.title %>"><%- yun_icon('arrow') %></a>
+  </li>
+  <% } %>
+  <% }); %>
+</ol>
+<% if (!posts.length) { %><div class="empty-state"><span>待</span><p>纸已铺开，静候第一篇来信。</p></div><% } %>

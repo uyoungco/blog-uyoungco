@@ -1,0 +1,29 @@
+<%# 原创 SVG 山水：分层颜色随主题令牌变化，装饰不参与交互或读屏。 %>
+<div class="landscape" aria-hidden="true">
+  <svg class="mountains" viewBox="0 0 1600 620" preserveAspectRatio="xMidYMax slice" fill="none">
+    <defs>
+      <%# 渐变直接引用各层令牌，避免 defs 中 currentColor 继承成正文墨色。 %>
+      <linearGradient id="mount-fade" x1="800" y1="80" x2="800" y2="620" gradientUnits="userSpaceOnUse"><stop stop-color="var(--mount-far)" stop-opacity=".5"/><stop offset="1" stop-color="var(--mount-far)" stop-opacity="0"/></linearGradient>
+      <linearGradient id="mount-mid-fade" x1="800" y1="260" x2="800" y2="620" gradientUnits="userSpaceOnUse"><stop stop-color="var(--mount-mid)" stop-opacity=".45"/><stop offset="1" stop-color="var(--mount-mid)" stop-opacity="0"/></linearGradient>
+      <linearGradient id="mount-near-fade" x1="800" y1="470" x2="800" y2="620" gradientUnits="userSpaceOnUse"><stop stop-color="var(--mount-near)" stop-opacity=".28"/><stop offset="1" stop-color="var(--mount-near)" stop-opacity="0"/></linearGradient>
+      <linearGradient id="mist-fade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="var(--paper)" stop-opacity="0"/><stop offset="1" stop-color="var(--paper)"/></linearGradient>
+    </defs>
+    <g class="mount-far" transform="translate(0 200) scale(1 .68)">
+      <path d="M-80 410C20 390 55 258 103 287c40 25 59 110 100 119 36 9 77-58 114-41 53 24 82 66 129 37 52-33 75-187 128-183 46 4 83 171 142 188 61 18 106-57 155-43 68 19 98-164 149-184 40-15 52 57 86 40 35-17 66-180 109-163 54 21 82 232 153 259 51 19 107-88 149-61 35 22 61 64 113 51V620H-80Z" fill="url(#mount-fade)"/>
+      <path d="m1136 220 28-77 22 22 28-72 31 48-23-13-8-12-25 70-23-18-21 65Z" fill="var(--paper)" opacity=".28"/>
+    </g>
+    <path class="mount-mid" transform="translate(0 95) scale(1 .85)" d="M-30 492c88 28 137-120 210-103 69 17 89 110 177 111 72 0 107-70 177-91 61-19 102 40 160 55 105 29 153-105 238-113 83-8 125 129 226 122 83-6 135-97 211-63 63 28 104 53 161 18v192H-30Z" fill="url(#mount-mid-fade)"/>
+    <path class="mount-near" d="M-30 578c105 14 182-48 277-35 85 13 118 39 194 32 121-12 155-52 268-25 96 22 134 34 228 6 82-25 140-27 224-5 93 25 165-30 229-19 46 8 89 25 130 17v71H-30Z" fill="url(#mount-near-fade)"/>
+    <g class="pavilion" transform="translate(0 150) scale(1 .85)" stroke="currentColor" stroke-width="2" opacity=".3">
+      <path d="M1135 327h61m-55-2c9 0 16-11 24-16 8 6 15 16 25 16m-38-3 13-15 13 15m-33 6v27m39-27v27m-47 0h56m-54-3h52m-33-24v24m14-24v24"/>
+      <path d="m1129 358 20-3 24 2 24-2 11 6" stroke-width="3"/>
+    </g>
+    <path d="M0 480h1600v140H0Z" fill="url(#mist-fade)"/>
+  </svg>
+  <%# 飞鸟保留原有线条并独立分组；单独视窗避免矮页头裁掉飞鸟，位移不会受山水缩放放大。 %>
+  <svg class="birds" viewBox="820 125 140 70" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+    <g class="bird"><path d="M853 174q12-10 23 3 13-12 24-8"/></g>
+    <g class="bird"><path d="M910 145q8-6 15 2 8-8 16-6"/></g>
+    <g class="bird"><path d="M830 146q5-4 10 2 6-6 11-4"/></g>
+  </svg>
+</div>

@@ -1,0 +1,1 @@
+<div class="wrap inner-page"><%- partial('_partial/page-heading', {title: page.tag, seal: '签引', plain: '标签文章', description: '同一枚签引下，藏着这些文字。'}) %><a class="text-link back-link" href="<%- url_for('/' + config.tag_dir + '/') %>">← 返回万象 · 全部标签</a><%- partial('_partial/post-list', {posts: page.posts}) %><%- partial('_partial/pagination') %></div>

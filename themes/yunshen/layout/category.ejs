@@ -1,0 +1,1 @@
+<div class="wrap inner-page"><%- partial('_partial/page-heading', {title: page.category, seal: '门类', plain: '分类文章', description: '循着这一条山径，读过一路风景。'}) %><a class="text-link back-link" href="<%- url_for('/' + config.category_dir + '/') %>">← 返回分门 · 全部分类</a><%- partial('_partial/post-list', {posts: page.posts}) %><%- partial('_partial/pagination') %></div>

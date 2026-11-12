@@ -1,0 +1,7 @@
+<div class="wrap inner-page">
+<%- partial('_partial/page-heading', {title: '藏经阁', seal: '旧卷', plain: '文章归档', description: '时光有序，文字有迹。写下的每一篇，都在这里。'}) %>
+<div class="archive-intro"><span>共藏 <strong><%= site.posts.length %></strong> 篇文字</span><span>一卷一念，日拱一卒。</span></div>
+<% let currentYear = ''; page.posts.each(post => { const year = date(post.date, 'YYYY'); if (year !== currentYear) { %><% if (currentYear) { %></ol></section><% } %><section class="archive-year"><h2><%= year %><small>年 · 记</small></h2><ol><% currentYear = year; } %><li><time datetime="<%= date(post.date, 'YYYY-MM-DD') %>"><%= date(post.date, 'MM.DD') %></time><a href="<%- url_for(post.path) %>"><%= post.title %></a><span class="archive-category"><%= post.categories.length ? post.categories.first().name : '随笔' %></span><span aria-hidden="true">↗</span></li><% }); %><% if (currentYear) { %></ol></section><% } %>
+<% if (!page.posts.length) { %><div class="empty-state"><span>空</span><p>还没有藏文，待来日落笔。</p></div><% } %>
+<%- partial('_partial/pagination') %>
+</div>

@@ -1,0 +1,40 @@
+# 云深处：栏目同时保留雅称与白话，移动端也能清楚辨认。
+menu:
+  - { name: 山门, plain: 首页, path: / }
+  - { name: 藏经阁, plain: 归档, path: /archives/ }
+  - { name: 万象, plain: 标签, path: /tags/ }
+  - { name: 分门, plain: 分类, path: /categories/ }
+  - { name: 洞府, plain: 关于, path: /about/ }
+
+brand:
+  seal: 云深
+  note: 云深不知处
+
+hero:
+  title: 云深处
+  lines: [云深不知处，, 只在此山中。]
+  description: 记技术，写生活。把折腾过的代码、偶然的灵感，和日子里的微光，都收进这一方小天地。
+  eyebrow: 一方小筑 · 半卷闲书
+  seal: 见山
+
+author:
+  bio: 在代码与山水之间，做一个认真生活的普通人。
+  initial: 予
+
+footer:
+  since: 2026
+  note: 山水一程，三生有幸。
+  # 两条备案号分别填写；留空时隐藏对应行，公安备案链接使用查询详情地址。
+  icp: '鲁ICP备15012762号-3'
+  psb: '鲁公网安备37040602005008号'
+  psb_url: 'http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=37040602005008'
+
+social:
+  github: ''
+  email: ''
+
+quotes:
+  - { text: 行到水穷处，坐看云起时。, author: 王维 }
+  - { text: 且将新火试新茶，诗酒趁年华。, author: 苏轼 }
+  - { text: 不积跬步，无以至千里。, author: 荀子 }
+  - { text: 看似寻常最奇崛，成如容易却艰辛。, author: 王安石 }

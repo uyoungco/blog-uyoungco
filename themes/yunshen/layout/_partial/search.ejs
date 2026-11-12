@@ -1,0 +1,6 @@
+<dialog class="search-dialog" id="search-dialog" aria-labelledby="search-title" data-index="<%- url_for('/search.json') %>">
+  <div class="search-dialog-head"><h2 id="search-title">循字寻踪 <small>搜索文章</small></h2><button class="icon-button search-close" type="button" aria-label="关闭搜索"><%- yun_icon('close') %></button></div>
+  <form class="search-form" role="search"><label class="sr-only" for="search-input">文章标题、正文或标签</label><%- yun_icon('search') %><input type="search" id="search-input" placeholder="一字一词，皆有回响…" autocomplete="off"><kbd>ESC</kbd></form>
+  <p class="search-status" role="status" aria-live="polite">输入篇名、正文或签引，寻一卷好文。</p><ol class="search-results"></ol>
+  <div class="search-dialog-foot">字里行间，总有相逢。<span>云深处 · 寻踪</span></div>
+</dialog>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="<%= config.language || 'zh-CN' %>">
+<%- partial('_partial/head') %>
+<body<% if (is_post()) { %> class="is-post"<% } %>>
+  <a class="skip-link" href="#main">跳至正文</a>
+  <div class="paper-grain" aria-hidden="true"></div>
+  <%- partial('_partial/header') %>
+  <% const pageBackdrop = !(is_home() && page.current === 1); %>
+  <main id="main"<% if (pageBackdrop) { %> class="has-page-backdrop"<% } %>>
+    <%# 首页已有首屏背景；其他路由只在这里渲染一套，避免重复 SVG ID 和重复动画。 %>
+    <% if (pageBackdrop) { %>
+    <div class="page-backdrop sky-scene" aria-hidden="true">
+      <%- partial('_partial/landscape') %>
+      <%- partial('_partial/sky') %>
+    </div>
+    <% } %>
+    <%- body %>
+  </main>
+  <%- partial('_partial/footer') %>
+  <%- partial('_partial/search') %>
+  <button class="back-top" type="button" aria-label="回到顶部" hidden><%- yun_icon('up') %><span>回顶</span></button>
+  <script src="<%- url_for('/js/main.js') %>" defer></script>
+</body>
+</html>

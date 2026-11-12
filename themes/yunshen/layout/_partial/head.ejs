@@ -1,0 +1,88 @@
+<% const description = page.description || (is_post() ? yun_summary(page, 160) : config.description);
+   const contentPage = is_post() || is_page() || page.kind === 'about'; %>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <script>
+    // 样式加载前恢复偏好，主题明暗与当地昼夜分开，避免刷新先亮后暗。
+    (() => {
+      const root = document.documentElement;
+      let mode = 'auto';
+      try { mode = localStorage.getItem('yunshen-theme') || 'auto'; } catch {}
+      if (!['auto', 'light', 'dark'].includes(mode)) mode = 'auto';
+      const theme = mode === 'auto' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : mode;
+      root.dataset.themeMode = mode;
+      root.dataset.theme = theme;
+      root.style.colorScheme = theme;
+      root.dataset.js = '';
+      const hour = new Date().getHours();
+      root.dataset.sky = hour >= 6 && hour < 18 ? 'day' : 'night';
+    })();
+  </script>
+  <title><%= (page.title ? page.title + ' · ' : '') + config.title %></title>
+  <meta name="description" content="<%= description %>">
+  <meta name="author" content="<%= config.author %>">
+  <meta property="og:type" content="<%= is_post() ? 'article' : 'website' %>">
+  <meta property="og:title" content="<%= page.title || config.title %>">
+  <meta property="og:description" content="<%= description %>">
+  <meta property="og:url" content="<%- full_url_for(page.path || '') %>">
+  <meta property="og:site_name" content="<%= config.title %>">
+  <link rel="canonical" href="<%- full_url_for(page.path || '') %>">
+  <link rel="icon" type="image/svg+xml" href="<%- url_for('/images/seal.svg') %>">
+  <%# 提前请求首屏装饰字形；Unicode 分片避免刷新时下载两套完整中文字体。 %>
+  <link rel="preload" href="<%- url_for('/fonts/brush/common.woff2') %>" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="<%- url_for('/fonts/elegant/common.woff2') %>" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="<%- url_for('/css/fonts.css') %>">
+  <link rel="stylesheet" href="<%- url_for('/css/style.css') %>">
+  <% if (contentPage) { %>
+  <%# 优先请求标题与正文常用分片，避免整篇生僻字请求挤占首屏。 %>
+  <% ['095', '096', '100'].forEach(part => { %>
+  <link rel="preload" href="<%- url_for('/fonts/noto-serif/' + part + '.woff2') %>" as="font" type="font/woff2" crossorigin>
+  <% }); %>
+  <% } %>
+  <%# 首页诸篇复用本地宋体分片；只加载字体定义，不引入内容页的排版样式。 %>
+  <% if (is_home() || contentPage) { %>
+  <link rel="stylesheet" href="<%- url_for('/css/article-fonts.css') %>">
+  <% } %>
+  <% if (contentPage) { %>
+  <link rel="stylesheet" href="<%- url_for('/css/article.css') %>">
+  <% } %>
+  <script>
+    // 首次绘制前等待本页字体，避免题字、导航与山水分批跳变；禁用 JS 时照常显示。
+    (() => {
+      const root = document.documentElement;
+      if (document.fonts) root.classList.add('fonts-pending');
+      document.addEventListener('DOMContentLoaded', () => {
+        // 字体与首页日月初始化完成后统一入场，后续切主题不重播动画。
+        const reveal = () => {
+          if (root.classList.contains('page-ready')) return;
+          root.classList.remove('fonts-pending');
+          root.classList.add('page-ready');
+          document.dispatchEvent(new Event('yunshen:ready'));
+        };
+        if (!document.fonts) { reveal(); return; }
+        // 强制完成初次排版，让 FontFaceSet 包含正文实际使用的分片。
+        void document.body.offsetHeight;
+        const timer = setTimeout(() => {
+          // 慢网最多额外等待 2.5 秒；未就绪的字体本次使用回退，下载完成也不突然切换。
+          const fallbacks = {
+            'Yun Brush': ['--font-brush', 'STXingkai,KaiTi,serif'],
+            'Yun Elegant': ['--font-elegant', '"Songti SC",SimSun,serif'],
+            'Yun Glyph Fix': ['--font-elegant', '"Songti SC",SimSun,serif'],
+            'Yun Article Serif': ['--font-serif', '"Songti SC",STSong,SimSun,serif'],
+            'Yun Article Sans': ['--font-sans', '-apple-system,"PingFang SC","Microsoft YaHei",sans-serif']
+          };
+          for (const face of document.fonts) {
+            if (face.status === 'loading' && fallbacks[face.family]) {
+              root.style.setProperty(...fallbacks[face.family]);
+            }
+          }
+          reveal();
+        }, 2500);
+        document.fonts.ready.then(() => { clearTimeout(timer); reveal(); });
+      }, { once: true });
+    })();
+  </script>
+  <%# Hexo 8 在生成阶段自动注入 generator 元信息，无需调用旧主题辅助函数。 %>
+</head>

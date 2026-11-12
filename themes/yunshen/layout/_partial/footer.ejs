@@ -1,0 +1,47 @@
+<footer class="site-footer">
+  <%# 卷末单独绘制山水，渐变 ID 与页头分开；装饰层不参与读屏和点击。 %>
+  <div class="footer-landscape" aria-hidden="true">
+    <svg class="footer-mountains" viewBox="0 0 1600 400" preserveAspectRatio="xMidYMin slice" fill="none">
+      <defs>
+        <linearGradient id="footer-far-fade" x2="0" y2="1"><stop stop-color="var(--mount-far)" stop-opacity=".3"/><stop offset="1" stop-color="var(--mount-far)" stop-opacity="0"/></linearGradient>
+        <linearGradient id="footer-mid-fade" x2="0" y2="1"><stop stop-color="var(--mount-mid)" stop-opacity=".34"/><stop offset="1" stop-color="var(--mount-mid)" stop-opacity="0"/></linearGradient>
+        <linearGradient id="footer-near-fade" x2="0" y2="1"><stop stop-color="var(--mount-near)" stop-opacity=".25"/><stop offset="1" stop-color="var(--mount-near)" stop-opacity="0"/></linearGradient>
+      </defs>
+      <path d="M-40 164C38 156 73 45 118 76S178 173 221 124 260 30 303 57 343 151 405 119 477 54 535 107 614 169 668 102 711 31 764 80 809 126 873 105 941 21 999 67 1042 149 1110 110 1195 33 1254 85 1310 161 1379 111 1441 40 1491 79 1548 141 1640 95V400H-40Z" fill="url(#footer-far-fade)"/>
+      <path d="M-40 212C42 219 96 124 153 143S240 236 301 188 375 100 430 142 490 223 570 193 670 137 725 155 797 234 869 201 954 133 1011 164 1081 235 1143 188 1218 119 1273 154 1326 224 1401 203 1511 153 1640 171V400H-40Z" fill="url(#footer-mid-fade)"/>
+      <path d="M-40 273C74 260 129 235 224 247S346 221 430 244 534 285 634 262 744 228 836 251 952 283 1055 260 1174 232 1262 254 1395 281 1482 258 1570 247 1640 251V400H-40Z" fill="url(#footer-near-fade)"/>
+    </svg>
+    <div class="footer-mist"></div>
+    <svg class="footer-boat" viewBox="0 0 90 42" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 26q30 9 62-2l-9 9H26Z" fill="currentColor" fill-opacity=".18"/>
+      <path d="M40 27V8m1 1q18 4 20 15H41M32 26l-9-10M8 38h25m10 0h35"/>
+    </svg>
+  </div>
+
+  <div class="wrap footer-inner">
+    <div class="footer-heading">
+      <p class="footer-kicker"><span class="footer-cloud" aria-hidden="true"></span><span>卷末</span><span class="footer-cloud" aria-hidden="true"></span></p>
+      <a class="footer-brand" href="<%- url_for('/') %>"><%= config.title %><span class="seal"><%= theme.brand.seal %></span></a>
+      <p class="footer-description"><%= config.description %></p>
+      <p class="footer-note"><%= theme.footer.note %></p>
+    </div>
+
+    <div class="footer-bottom">
+      <nav class="footer-nav" aria-label="页脚导航"><% theme.menu.forEach(item => { %><a href="<%- url_for(item.path) %>"><%= item.name %></a><% }); %></nav>
+      <% if (theme.social.github || theme.social.email) { %>
+      <div class="footer-social">
+        <% if (theme.social.github) { %><a href="<%= theme.social.github %>" target="_blank" rel="noopener noreferrer">GitHub ↗</a><% } %>
+        <% if (theme.social.email) { %><a href="mailto:<%= theme.social.email %>">飞鸽传书 ↗</a><% } %>
+      </div>
+      <% } %>
+      <small class="footer-colophon"><span>© <%= theme.footer.since %><%= Number(theme.footer.since) !== Number(date(Date.now(), 'YYYY')) ? ' — ' + date(Date.now(), 'YYYY') : '' %> <%= config.author %></span><span>由 <a href="https://hexo.io/" target="_blank" rel="noopener noreferrer">Hexo</a> 驱动</span><span>主题 云深处</span></small>
+      <%# 两条备案独立显示，本地图标通过 url_for 兼容子目录部署。 %>
+      <% if (theme.footer.icp || theme.footer.psb) { %>
+      <small class="footer-records">
+        <% if (theme.footer.icp) { %><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"><span><%= theme.footer.icp %></span></a><% } %>
+        <% if (theme.footer.psb) { %><a href="<%= theme.footer.psb_url %>" target="_blank" rel="noopener noreferrer"><img src="<%- url_for('/images/beian.png') %>" alt="" width="20" height="20"><span><%= theme.footer.psb %></span></a><% } %>
+      </small>
+      <% } %>
+    </div>
+  </div>
+</footer>

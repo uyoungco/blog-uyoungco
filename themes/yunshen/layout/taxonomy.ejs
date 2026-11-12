@@ -1,0 +1,7 @@
+<% const isTags = page.kind === 'tags'; const items = isTags ? site.tags : site.categories; %>
+<div class="wrap inner-page">
+<%- partial('_partial/page-heading', {title: isTags ? '万象' : '分门', seal: isTags ? '签引' : '门类', plain: isTags ? '文章标签' : '文章分类', description: isTags ? '一枚签引，一条小径。循着兴趣，遇见字里行间的万千世界。' : '将纷繁的思绪分门别类，在熟悉的领域里，慢慢向深处走。'}) %>
+<p class="taxonomy-summary">共 <strong><%= items.length %></strong> <%= isTags ? '枚签引' : '门分类' %>，收录 <%= site.posts.length %> 篇文字。</p>
+<div class="taxonomy-grid<%= isTags ? ' taxonomy-tags' : '' %>"><% items.sort('length', -1).each((item, index) => { %><a class="taxonomy-card" href="<%- url_for(item.path) %>"><span class="taxonomy-index"><%= isTags ? '#' : yun_number(index + 1) %></span><h2><%= item.name %></h2><span><%= item.length %> 篇 <span aria-hidden="true">↗</span></span></a><% }); %></div>
+<% if (!items.length) { %><div class="empty-state"><span>待</span><p>在文章 front matter 中添加 <%= isTags ? 'tags' : 'categories' %>，便可在此相逢。</p><a class="text-link" href="<%- url_for('/') %>">返回山门 →</a></div><% } %>
+</div>

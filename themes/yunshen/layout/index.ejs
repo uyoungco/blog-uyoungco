@@ -1,0 +1,54 @@
+<% const allPosts = site.posts.sort('-date').toArray();
+   const firstPage = page.current === 1;
+   const latest = allPosts[0];
+   const featured = allPosts.filter(post => post.featured).slice(0, 3);
+   const selections = featured.length ? featured : allPosts.slice(1, 4);
+   const totalMinutes = allPosts.reduce((sum, post) => sum + yun_minutes(post), 0);
+%>
+<% if (firstPage) { %>
+<section class="hero sky-scene">
+  <%- partial('_partial/landscape') %>
+  <div class="hero-inner wrap">
+    <div class="hero-copy">
+      <p class="eyebrow"><span class="short-rule"></span><%= theme.hero.eyebrow %></p>
+      <h1><% theme.hero.lines.forEach(line => { %><span><%= line %></span><% }); %></h1>
+      <p class="hero-description"><%= theme.hero.description %></p>
+      <div class="hero-actions"><a class="button" href="#scrolls">入山阅卷 <%- yun_icon('arrow') %></a><a class="text-link" href="<%- url_for('/' + config.archive_dir + '/') %>">且看往日 <span>↗</span></a></div>
+      <dl class="hero-stats">
+        <% [[allPosts.length, '藏文', '篇'], [site.categories.length, '门类', '门'], [site.tags.length, '签引', '枚']].forEach(([count, label, unit]) => { %>
+        <div><dt><%= label %></dt><dd><strong><%= count %></strong><span><%= unit %></span></dd></div>
+        <% }); %>
+        <div><dt>可读</dt><dd><strong><%= totalMinutes %></strong><span>分钟</span></dd></div>
+      </dl>
+    </div>
+    <div class="hero-inscription" aria-hidden="true">
+      <%- partial('_partial/sky') %>
+      <p class="vertical-caption">山水有相逢 · 文字有回声</p><p class="hero-brush"><%= theme.hero.title %></p><span class="seal hero-seal"><%= theme.hero.seal %></span>
+    </div>
+  </div>
+  <div class="hero-bottom wrap"><span>一字一世界，一卷一浮生</span><a href="#scrolls" aria-label="向下阅读">往下 · 阅卷 <span>↓</span></a></div>
+</section>
+<% } %>
+<div class="wrap home-content" id="scrolls">
+  <% if (firstPage && latest) { %>
+  <div class="section-heading"><h2>今日开卷 <small>新墨初干，邀君共读</small></h2><span class="section-number">壹 · 新篇</span></div>
+  <a class="latest-scroll" href="<%- url_for(latest.path) %>">
+    <div class="scroll-date"><span><%= yun_number(Number(date(latest.date, 'D'))) %></span><small><%= yun_number(Number(date(latest.date, 'M'))) %>月</small><em><%= date(latest.date, 'YYYY') %></em></div>
+    <div class="latest-body"><div class="post-meta"><span class="category-dot"></span><span><%= latest.categories.length ? latest.categories.first().name : '随笔' %></span><span class="meta-separator">/</span><span>约 <%= yun_minutes(latest) %> 分钟可读毕</span></div><h3><%= latest.title %></h3><p><%= yun_summary(latest, 120) %></p><span class="text-link">展卷细读 <span>→</span></span></div>
+    <span class="scroll-glyph" aria-hidden="true">卷</span>
+  </a>
+  <% } %>
+  <% if (firstPage && selections.length) { %>
+  <section class="featured-section"><div class="section-heading"><h2>案头清供 <small>几篇可以先看的</small></h2><span class="section-number">贰 · 拾遗</span></div>
+    <div class="featured-grid"><% selections.forEach((post, index) => { %><a class="featured-post" href="<%- url_for(post.path) %>"><span class="featured-number"><%= ['壹','贰','叁'][index] %></span><span class="post-meta"><%= post.categories.length ? post.categories.first().name : '随笔' %></span><h3><%= post.title %></h3><p><%= yun_summary(post, 72) %></p><span class="featured-foot"><time datetime="<%= date(post.date, 'YYYY-MM-DD') %>"><%= date(post.date, 'YYYY.MM.DD') %></time><span>↗</span></span></a><% }); %></div>
+  </section>
+  <% } %>
+  <%- partial('_partial/divider') %>
+  <div class="content-columns">
+    <section class="post-feed"><div class="section-heading"><h2>诸篇 <small>全部文章</small></h2><a class="text-link small" href="<%- url_for('/' + config.archive_dir + '/') %>">去藏经阁 <span>→</span></a></div>
+      <%- partial('_partial/post-list', { posts: page.posts, numbered: true }) %>
+      <%- partial('_partial/pagination') %>
+    </section>
+    <%- partial('_partial/sidebar') %>
+  </div>
+</div>

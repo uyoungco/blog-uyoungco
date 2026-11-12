@@ -1,0 +1,73 @@
+<% const contents = toc(page.content, { list_number: false, class: 'toc' });
+   const categoryIds = page.categories.map(category => category._id);
+   const related = site.posts.sort('-date').filter(post => post._id !== page._id && post.categories.some(category => categoryIds.includes(category._id))).limit(2);
+%>
+<article class="article-page">
+  <%# 页头从文章分类与标题开始，使用 900 字重宋体；纸面与目录在下方并排。 %>
+  <header class="article-hero">
+    <div class="wrap article-header">
+      <% if (page.categories.length) { const category = page.categories.first(); %>
+      <a class="article-category" href="<%- url_for(category.path) %>"><span class="category-dot"></span><%= category.name %></a>
+      <% } %>
+      <h1><%= page.title %></h1>
+      <% if (page.description) { %><p class="article-description"><%= page.description %></p><% } %>
+      <div class="article-byline">
+        <a href="<%- url_for('/about/') %>"><%= page.author || config.author %></a><i aria-hidden="true"></i>
+        <time datetime="<%= date(page.date, 'YYYY-MM-DD') %>"><%= yun_han_date(page.date) %></time><i aria-hidden="true"></i>
+        <span>约 <%= yun_minutes(page) %> 分钟</span>
+        <% if (page.updated && date(page.updated, 'YYYY-MM-DD') !== date(page.date, 'YYYY-MM-DD')) { %>
+        <span class="article-updated">修订于 <%= date(page.updated, 'YYYY.MM.DD') %></span>
+        <% } %>
+      </div>
+    </div>
+  </header>
+  <div class="wrap article-columns<%= contents ? ' has-toc' : '' %>">
+    <div class="article-paper">
+      <div class="article-fret top" aria-hidden="true"></div>
+      <div class="prose"><%- page.content %></div>
+      <footer class="article-end">
+        <div class="article-colophon"><p><span><%= page.author || config.author %></span><br>书于 <time datetime="<%= date(page.date, 'YYYY-MM-DD') %>"><%= yun_han_date(page.date) %></time></p><span class="seal"><%= theme.brand.seal %></span></div>
+        <% if (page.tags.length) { %><div class="article-tags"><span>签引</span><div class="tag-cloud"><% page.tags.each(tag => { %><a href="<%- url_for(tag.path) %>"><%= tag.name %></a><% }); %></div></div><% } %>
+        <div class="article-actions"><button class="button share-article" type="button">传阅此文</button><span class="share-status" role="status" aria-live="polite"></span></div>
+      </footer>
+      <div class="article-fret bottom" aria-hidden="true"></div>
+    </div>
+    <% if (contents) { %>
+    <aside class="article-toc" aria-label="文章目录"><h2>目录</h2><nav><%- contents %></nav></aside>
+    <% } %>
+  </div>
+  <div class="wrap article-after">
+    <nav class="post-neighbors" aria-label="相邻文章">
+      <% if (page.prev) { %><a href="<%- url_for(page.prev.path) %>"><small>← 后一篇</small><strong><%= page.prev.title %></strong></a><% } else { %><div class="neighbor-empty"><small>已是最新一卷</small></div><% } %>
+      <% if (page.next) { %><a href="<%- url_for(page.next.path) %>"><small>前一篇 →</small><strong><%= page.next.title %></strong></a><% } else { %><div class="neighbor-empty"><small>已至开篇之处</small></div><% } %>
+    </nav>
+    <% if (related.length) { %>
+    <section class="article-related"><div class="section-heading"><h2>同道之文 <small>相关阅读</small></h2></div><div class="related-grid">
+      <% related.each(post => { %><a class="related-card" href="<%- url_for(post.path) %>"><span class="post-meta"><span class="category-dot"></span><%= post.categories.first().name %></span><h3><%= post.title %></h3><p><%= yun_summary(post, 100) %></p><span class="text-link">展卷 <span>→</span></span></a><% }); %>
+    </div></section>
+    <% } %>
+  </div>
+  <%# 查看器沿用文章的主题变量；图片入口由脚本增强，Markdown 与无脚本阅读保持原样。 %>
+  <dialog class="image-viewer" id="image-viewer" aria-labelledby="image-viewer-title" aria-describedby="image-viewer-help">
+    <header class="image-viewer-head">
+      <h2 id="image-viewer-title">展卷观图 <small class="image-viewer-count" aria-live="polite"></small></h2>
+      <button class="icon-button image-viewer-close" type="button" aria-label="关闭图片查看器" autofocus><%- yun_icon('close') %></button>
+    </header>
+    <div class="image-viewer-stage">
+      <img class="image-viewer-image" alt="" draggable="false" hidden>
+      <p class="image-viewer-status" role="status"></p>
+    </div>
+    <p class="image-viewer-caption"></p>
+    <nav class="image-viewer-tools" aria-label="图片查看操作">
+      <button class="icon-button image-viewer-prev" type="button" aria-label="上一张图片"><%- yun_icon('arrow') %></button>
+      <div class="image-viewer-zoom">
+        <button class="icon-button image-viewer-out" type="button" aria-label="缩小图片"><span aria-hidden="true">−</span></button>
+        <output class="image-viewer-scale" aria-label="相对适屏尺寸的缩放比例" aria-live="off">100%</output>
+        <button class="icon-button image-viewer-in" type="button" aria-label="放大图片"><span aria-hidden="true">＋</span></button>
+        <button class="image-viewer-fit" type="button">适屏</button>
+      </div>
+      <button class="icon-button image-viewer-next" type="button" aria-label="下一张图片"><%- yun_icon('arrow') %></button>
+    </nav>
+    <p class="sr-only" id="image-viewer-help">可用滚轮或双指缩放，放大后拖动查看；左右方向键切图，Escape 关闭。</p>
+  </dialog>
+</article>
