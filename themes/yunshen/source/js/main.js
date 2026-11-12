@@ -11,6 +11,12 @@
   addEventListener('pageshow', updateHeader);
   updateHeader();
 
+  // 旧版 iOS WebView 只提供 addListener，不能让媒体查询监听中断后续图片和代码初始化。
+  function onMediaChange(query, listener) {
+    if (typeof query.addEventListener === 'function') query.addEventListener('change', listener);
+    else query.addListener(listener);
+  }
+
   const themeControl = document.querySelector('.theme-control');
   const themeToggle = document.querySelector('.theme-toggle');
   const themeMenu = document.querySelector('.theme-menu');
@@ -77,7 +83,7 @@
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !themeMenu.hidden) { event.preventDefault(); closeThemeMenu(); }
   });
-  deviceTheme.addEventListener('change', () => {
+  onMediaChange(deviceTheme, () => {
     document.querySelector('.theme-auto-status').textContent = `当前${deviceTheme.matches ? '深色' : '浅色'}`;
     if (root.dataset.themeMode === 'auto') applyTheme('auto');
   });
@@ -163,13 +169,16 @@
   function updateAmbient() {
     scene.classList.toggle('ambient-running', sceneVisible && !document.hidden && !reducedMotion.matches && root.classList.contains('entrance-complete'));
   }
-  const sceneObserver = new IntersectionObserver(([entry]) => {
-    sceneVisible = entry.isIntersecting;
-    updateAmbient();
-  });
-  sceneObserver.observe(scene);
+  // 缺少可见性观察器时保持装饰静止，文章交互仍照常初始化。
+  if (typeof IntersectionObserver === 'function') {
+    const sceneObserver = new IntersectionObserver(([entry]) => {
+      sceneVisible = entry.isIntersecting;
+      updateAmbient();
+    });
+    sceneObserver.observe(scene);
+  }
   document.addEventListener('visibilitychange', updateAmbient);
-  reducedMotion.addEventListener('change', updateAmbient);
+  onMediaChange(reducedMotion, updateAmbient);
   addEventListener('pagehide', () => scene.classList.remove('ambient-running'));
   addEventListener('pageshow', updateAmbient);
 
@@ -184,13 +193,15 @@
   function updateFooterAmbient() {
     footer.classList.toggle('ambient-running', footerVisible && !document.hidden && !reducedMotion.matches);
   }
-  const footerObserver = new IntersectionObserver(([entry]) => {
-    footerVisible = entry.isIntersecting;
-    updateFooterAmbient();
-  });
-  footerObserver.observe(footer);
+  if (typeof IntersectionObserver === 'function') {
+    const footerObserver = new IntersectionObserver(([entry]) => {
+      footerVisible = entry.isIntersecting;
+      updateFooterAmbient();
+    });
+    footerObserver.observe(footer);
+  }
   document.addEventListener('visibilitychange', updateFooterAmbient);
-  reducedMotion.addEventListener('change', updateFooterAmbient);
+  onMediaChange(reducedMotion, updateFooterAmbient);
   addEventListener('pagehide', () => footer.classList.remove('ambient-running'));
   addEventListener('pageshow', updateFooterAmbient);
 
@@ -216,7 +227,7 @@
       menuToggle.focus();
     }
   });
-  matchMedia('(min-width: 761px)').addEventListener('change', event => { if (event.matches) closeMenu(); });
+  onMediaChange(matchMedia('(min-width: 761px)'), event => { if (event.matches) closeMenu(); });
 
   const dialog = document.querySelector('#search-dialog');
   const viewer = document.querySelector('#image-viewer');
@@ -296,7 +307,7 @@
 
   function openSearch() {
     // 原生模态框之间不叠加；查看图片时，搜索快捷键仍被消费但不打开搜索。
-    if (viewer?.open) return;
+    if (viewer?.hasAttribute('open')) return;
     closeMenu();
     if (!dialog.open) dialog.showModal();
     input.focus();
@@ -344,6 +355,34 @@
     let y = 0;
     let gesture;
     const pointers = new Map();
+    const nativeViewer = typeof viewer.showModal === 'function' && typeof viewer.close === 'function';
+    let backdrop;
+
+    if (!nativeViewer) {
+      // 不支持原生 dialog 的微信仍使用站内查看器；移出 main 的隔离层，避免被页头遮住。
+      viewer.classList.add('image-viewer-fallback');
+      viewer.setAttribute('role', 'dialog');
+      viewer.setAttribute('aria-modal', 'true');
+      document.body.append(viewer);
+      backdrop = document.createElement('div');
+      backdrop.className = 'image-viewer-backdrop';
+      backdrop.hidden = true;
+      backdrop.setAttribute('aria-hidden', 'true');
+      viewer.before(backdrop);
+      backdrop.addEventListener('click', closeViewer);
+      document.addEventListener('focusin', event => {
+        if (viewer.hasAttribute('open') && !viewer.contains(event.target)) close.focus({ preventScroll: true });
+      });
+    }
+
+    function closeViewer() {
+      if (nativeViewer) viewer.close();
+      else {
+        viewer.removeAttribute('open');
+        backdrop.hidden = true;
+        restoreReading();
+      }
+    }
 
     // 用原生按钮补足键盘入口；picture 整体移动，保留响应式图片和已有链接语义。
     const pictures = articleImages.map((source, index) => {
@@ -363,7 +402,14 @@
         closeMenu();
         closeThemeMenu();
         root.classList.add('image-viewer-open');
-        viewer.showModal();
+        if (nativeViewer) viewer.showModal();
+        else {
+          // 固定背景并保留阅读偏移，避免旧版 iOS 仅设置 overflow 后仍能滚动正文。
+          root.style.setProperty('--image-viewer-scroll-top', `${-scrollPosition.top}px`);
+          root.classList.add('image-viewer-fallback-open');
+          backdrop.hidden = false;
+          viewer.setAttribute('open', '');
+        }
         showImage(index);
         close.focus();
       });
@@ -422,13 +468,13 @@
       incoming.draggable = false;
       incoming.hidden = true;
       incoming.addEventListener('load', () => {
-        if (image !== incoming || !viewer.open) return;
+        if (image !== incoming || !viewer.hasAttribute('open')) return;
         fitImage();
         incoming.hidden = false;
         status.hidden = true;
       }, { once: true });
       incoming.addEventListener('error', () => {
-        if (image !== incoming || !viewer.open) return;
+        if (image !== incoming || !viewer.hasAttribute('open')) return;
         status.textContent = '图片暂未展开，请稍后再试。';
       }, { once: true });
       image.replaceWith(incoming);
@@ -452,19 +498,19 @@
     zoomOut.addEventListener('click', () => zoomImage(scale / 1.25));
     zoomIn.addEventListener('click', () => zoomImage(scale * 1.25));
     fit.addEventListener('click', fitImage);
-    close.addEventListener('click', () => viewer.close());
+    close.addEventListener('click', closeViewer);
     viewer.addEventListener('click', event => {
       const rect = viewer.getBoundingClientRect();
-      if (event.target === viewer && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) viewer.close();
+      if (event.target === viewer && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) closeViewer();
     });
     viewer.addEventListener('keydown', event => {
-      // 显式衔接首尾按钮，避免反向 Tab 从原生 dialog 进入浏览器工具栏。
+      // 两种弹层都衔接首尾焦点；下标取尾元素兼容尚无 Array.at 的 iOS。
       if (event.key === 'Tab') {
         const buttons = [...viewer.querySelectorAll('button:not(:disabled):not([hidden])')];
         if (event.shiftKey && document.activeElement === buttons[0]) {
           event.preventDefault();
-          buttons.at(-1).focus();
-        } else if (!event.shiftKey && document.activeElement === buttons.at(-1)) {
+          buttons[buttons.length - 1].focus();
+        } else if (!event.shiftKey && document.activeElement === buttons[buttons.length - 1]) {
           event.preventDefault();
           buttons[0].focus();
         }
@@ -474,17 +520,24 @@
         if (event.key === 'ArrowLeft' && activeIndex > 0) showImage(activeIndex - 1);
         if (event.key === 'ArrowRight' && activeIndex < pictures.length - 1) showImage(activeIndex + 1);
       }
+      if (event.key === 'Escape' && !nativeViewer) {
+        event.preventDefault();
+        closeViewer();
+      }
     });
-    viewer.addEventListener('close', () => {
+    function restoreReading() {
       // close 事件异步派发；若已重新打开，不让上一轮清理解除当前模态锁定。
-      if (viewer.open) return;
+      if (viewer.hasAttribute('open')) return;
       pointers.clear();
       gesture = undefined;
+      root.classList.remove('image-viewer-fallback-open');
+      root.style.removeProperty('--image-viewer-scroll-top');
+      // 先释放固定背景，用数值坐标兼容旧 WebKit；保留滚动锁的 auto 行为，防止平滑滚动跳页。
+      window.scrollTo(scrollPosition.left, scrollPosition.top);
       root.classList.remove('image-viewer-open');
-      // 原生 dialog 约束模态焦点；退出后明确还原入口与滚动位置，避免跳回文章顶部。
-      window.scrollTo({ ...scrollPosition, behavior: 'instant' });
       origin.focus({ preventScroll: true });
-    });
+    }
+    viewer.addEventListener('close', restoreReading);
 
     stage.addEventListener('wheel', event => {
       event.preventDefault();
@@ -540,7 +593,12 @@
       });
     }
     // 窗口或手机方向变化后重新适屏；绝对定位的图片不会反过来触发视窗尺寸变化。
-    new ResizeObserver(() => { if (viewer.open && width) fitImage(); }).observe(stage);
+    function resizeImage() {
+      if (viewer.hasAttribute('open') && width) fitImage();
+    }
+    // 观察器属于浏览器能力边界；旧 WebView 通过窗口尺寸事件处理横竖屏切换。
+    if (typeof ResizeObserver === 'function') new ResizeObserver(resizeImage).observe(stage);
+    else addEventListener('resize', resizeImage);
   }
 
   const quotePanel = document.querySelector('[data-quotes]');
@@ -651,7 +709,12 @@
       if (!scheduled) { scheduled = true; requestAnimationFrame(updateReading); }
     }, { passive: true });
     // 字体、图片和窗口宽度改变时重算位置，避免缓存因排版变化而偏移。
-    new ResizeObserver(measureReading).observe(article);
+    // 无 ResizeObserver 时仍在窗口变化、字体和图片加载后校准目录及进度。
+    if (typeof ResizeObserver === 'function') new ResizeObserver(measureReading).observe(article);
+    else {
+      addEventListener('resize', measureReading);
+      article.addEventListener('load', measureReading, true);
+    }
     document.fonts.ready.then(measureReading);
     measureReading();
   }

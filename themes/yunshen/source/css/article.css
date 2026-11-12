@@ -1,5 +1,5 @@
 /* 保留 Noto 宋体与原有正文细节；字号使用 rem，辅助文字同步提高对比度。 */
-.article-page,.standalone-prose,.about-paper .prose{
+.article-page,.standalone-prose,.about-paper .prose,.image-viewer{
   /* 与首屏超时回退共享变量，慢网显示后不再因迟到的字形改变文章排版。 */
   --serif:var(--font-serif,"Yun Article Serif","Noto Serif SC","Songti SC",STSong,serif);
   --article-sans:var(--font-sans,"Yun Article Sans","Noto Sans SC",-apple-system,"PingFang SC",sans-serif);
@@ -103,10 +103,15 @@
 .prose .image-trigger img{margin:0}
 .prose figure:not(.highlight) .image-trigger{margin:0 auto}
 .prose .image-trigger:hover img{border-color:var(--gold)}
-/* 原生模态层复用文章纸色与雅体；稳定滚动条槽，开关时不挤动阅读布局。 */
-html.image-viewer-open{overflow:hidden;scrollbar-gutter:stable}
-.image-viewer{position:fixed;inset:0;width:min(1200px,calc(100vw - 64px));height:min(900px,calc(100dvh - 64px));max-width:none;max-height:none;margin:auto;padding:0;border:1px solid var(--gold-soft);border-radius:3px;background:var(--surface);color:var(--ink);box-shadow:var(--article-shadow);font-family:var(--elegant)}
+/* 两种弹层复用文章变量；兼容弹层位于 body，脱离 main 的隔离层后仍保留主题。 */
+html.image-viewer-open{overflow:hidden;scrollbar-gutter:stable;scroll-behavior:auto}
+html.image-viewer-fallback-open body{position:fixed;top:var(--image-viewer-scroll-top);left:0;width:100%}
+/* 显式四边与 vh 兼容旧 WebView；支持动态视口时再用 dvh 跟随浏览器工具栏。 */
+.image-viewer{position:fixed;top:0;right:0;bottom:0;left:0;width:min(1200px,calc(100vw - 64px));height:min(900px,calc(100vh - 64px));height:min(900px,calc(100dvh - 64px));max-width:none;max-height:none;margin:auto;padding:0;border:1px solid var(--gold-soft);border-radius:3px;background:var(--surface);color:var(--ink);box-shadow:var(--article-shadow);font-family:var(--elegant)}
+.image-viewer:not([open]){display:none}
 .image-viewer[open]{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;animation:ink-appear .2s ease}
+.image-viewer-fallback{z-index:101}
+.image-viewer-backdrop{position:fixed;top:0;right:0;bottom:0;left:0;z-index:100;background:rgb(13 18 22 / .72);backdrop-filter:blur(5px)}
 .image-viewer::backdrop{background:rgb(13 18 22 / .72);backdrop-filter:blur(5px)}
 .image-viewer::before{content:"";position:absolute;inset:5px;border:1px solid color-mix(in srgb,var(--gold-soft) 45%,transparent);pointer-events:none;border-radius:1px}
 .image-viewer-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 20px}
@@ -131,22 +136,23 @@ html.image-viewer-open{overflow:hidden;scrollbar-gutter:stable}
 .image-viewer-fit{padding:6px 14px;font:.9375rem/1.5 var(--elegant);letter-spacing:.1em}
 .image-viewer-prev .icon{rotate:180deg}
 @media(max-width:600px){
-  .image-viewer{inset:calc(8px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left));width:auto;height:auto;margin:0}
+  .image-viewer{top:calc(8px + env(safe-area-inset-top));right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));left:calc(8px + env(safe-area-inset-left));width:auto;height:auto;margin:0}
   .image-viewer-head{padding:8px 12px}.image-viewer-head h2{font-size:1.5rem}.image-viewer-count{margin-left:8px;font-size:.8125rem}
   .image-viewer-tools{gap:4px;padding:8px 12px}.image-viewer-zoom{gap:4px}.image-viewer-scale{display:none}.image-viewer-fit{padding-inline:10px}
   .image-viewer-caption{padding-inline:16px;font-size:.8125rem}
 }
 .prose figcaption{display:block;margin-top:10px;font:0.875rem/1.8 var(--elegant);letter-spacing:.1em;color:var(--ink-mute);text-align:center}
 /* 高亮代码使用独立深色墨底，标题栏与复制按钮不遮挡代码。 */
-.prose .highlight,.prose>pre{position:relative;margin:1.6em 0;border-radius:6px;overflow:hidden;background:#151d22;border:1px solid #26323b;box-shadow:var(--article-shadow);letter-spacing:0;color:#e3ddd0}
+/* 基础代码块不依赖脚本即可滚动；增强后由内部 code-scroll 承担滚动，标题栏保持固定。 */
+.prose .highlight,.prose>pre{position:relative;max-width:100%;min-width:0;margin:1.6em 0;border-radius:6px;overflow-x:auto;background:#151d22;border:1px solid #26323b;box-shadow:var(--article-shadow);letter-spacing:0;color:#e3ddd0;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .prose .code-toolbar{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:8px 16px;border-bottom:1px solid #26323b;background:#1a242a;margin:0;text-align:left}
 .code-language{font:0.8125rem/1.8 var(--mono);letter-spacing:.1em;color:#cdb07a;text-transform:lowercase}
 .code-language::before{content:"◆ ";color:#e0674f;font-size:9px;vertical-align:2px}
 .copy-code{position:static;display:block;background:none;border:1px solid #33424c;border-radius:2px;padding:2px 10px;font:0.8125rem/1.8 var(--elegant);letter-spacing:.1em;color:#aeb4b1;opacity:1}
 .copy-code:hover{color:#f4efe4;border-color:#cdb07a}
-.prose pre{font:0.9375rem/1.75 var(--mono);color:#e3ddd0;padding:18px 20px;margin:0;overflow-x:auto;letter-spacing:0;tab-size:2;text-align:left}
+.prose pre{font:0.9375rem/1.75 var(--mono);color:#e3ddd0;padding:18px 20px;margin:0;overflow-x:auto;white-space:pre;overflow-wrap:normal;word-break:normal;letter-spacing:0;tab-size:2;text-align:left}
 .prose pre code{font:inherit;color:inherit;letter-spacing:0;background:none;border:0;padding:0;margin:0}
-.prose .code-scroll{overflow-x:auto;max-width:100%;scrollbar-width:thin;scrollbar-color:#7e6a45 transparent}
+.prose .code-scroll{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#7e6a45 transparent}
 .prose .highlight table{display:table;width:100%;font:inherit;border:0;margin:0}
 .prose .highlight tbody{border:0}
 .prose .highlight :is(td,th){padding:0;border:0;background:none;vertical-align:top}
@@ -195,12 +201,12 @@ html.image-viewer-open{overflow:hidden;scrollbar-gutter:stable}
 html:has(>body.is-post){scroll-padding-top:0;scrollbar-width:thin;scrollbar-color:var(--gold-soft) transparent}
 .reading-progress{position:fixed;left:0;top:0;height:2px;width:100%;transform:scaleX(0);transform-origin:left;z-index:40;background:linear-gradient(90deg,var(--gold),var(--accent));pointer-events:none}
 /* 内容页与全站使用同一实际主题，设备媒体查询仅作为无脚本回退。 */
-:root[data-theme="dark"] .article-page,:root[data-theme="dark"] .standalone-prose,:root[data-theme="dark"] .about-paper .prose{--ink:#e8e2d3;--ink-soft:#aeb4b1;--ink-mute:#97a4a5;--line:#26323b;--jade:#74a7a6;--code-ink:#f08b74;--article-shadow:0 2px 6px rgb(0 0 0 / .3),0 20px 44px -14px rgb(0 0 0 / .7)}:root[data-theme="dark"] .article-category .category-dot{background:#a7b874}:root[data-theme="dark"] .article-fret{opacity:.4}
-@media(prefers-color-scheme:dark){:root:not([data-theme]) .article-page,:root:not([data-theme]) .standalone-prose,:root:not([data-theme]) .about-paper .prose{--ink:#e8e2d3;--ink-soft:#aeb4b1;--ink-mute:#97a4a5;--line:#26323b;--jade:#74a7a6;--code-ink:#f08b74;--article-shadow:0 2px 6px rgb(0 0 0 / .3),0 20px 44px -14px rgb(0 0 0 / .7)}:root:not([data-theme]) .article-category .category-dot{background:#a7b874}:root:not([data-theme]) .article-fret{opacity:.4}}
+:root[data-theme="dark"] .article-page,:root[data-theme="dark"] .standalone-prose,:root[data-theme="dark"] .about-paper .prose,:root[data-theme="dark"] .image-viewer{--ink:#e8e2d3;--ink-soft:#aeb4b1;--ink-mute:#97a4a5;--line:#26323b;--jade:#74a7a6;--code-ink:#f08b74;--article-shadow:0 2px 6px rgb(0 0 0 / .3),0 20px 44px -14px rgb(0 0 0 / .7)}:root[data-theme="dark"] .article-category .category-dot{background:#a7b874}:root[data-theme="dark"] .article-fret{opacity:.4}
+@media(prefers-color-scheme:dark){:root:not([data-theme]) .article-page,:root:not([data-theme]) .standalone-prose,:root:not([data-theme]) .about-paper .prose,:root:not([data-theme]) .image-viewer{--ink:#e8e2d3;--ink-soft:#aeb4b1;--ink-mute:#97a4a5;--line:#26323b;--jade:#74a7a6;--code-ink:#f08b74;--article-shadow:0 2px 6px rgb(0 0 0 / .3),0 20px 44px -14px rgb(0 0 0 / .7)}:root:not([data-theme]) .article-category .category-dot{background:#a7b874}:root:not([data-theme]) .article-fret{opacity:.4}}
 @media(max-width:1100px){.article-columns.has-toc{grid-template-columns:minmax(0,820px)}.article-toc{display:none}}
-/* 手机正文保持 17px；代码和表格只在自身容器滚动，不缩小字体挤压内容。 */
+/* 手机正文保持 17px，代码独立调整为 13px；长行通过横向滚动保留缩进。 */
 @media(max-width:700px){
   .article-page{padding-bottom:60px}.article-hero{padding:40px 0 90px}.article-header{width:calc(100% - 36px)}.article-description{font-size:1.0625rem}.article-category,.article-byline{font-size:.8125rem}.article-columns{width:calc(100% - 36px);margin-top:-40px}.article-paper{padding:50px 22px 48px}.article-fret{left:12px;right:12px}.article-fret.top{top:14px}.article-fret.bottom{bottom:14px}.post-neighbors,.related-grid{grid-template-columns:1fr}.post-neighbors>:last-child{border-left:0;border-top:1px solid var(--gold-soft)}.post-neighbors strong{font-size:1.125rem}.article-after{margin-top:40px}.article-related{margin-top:48px}.related-grid{gap:20px}.related-card h3{font-size:1.125rem}.related-card>p,.related-card .text-link{font-size:.9375rem}.article-colophon{font-size:.9375rem;letter-spacing:.08em}.share-status,.prose figcaption,.article-tags>span,.article-tags .tag-cloud a,.post-neighbors small{font-size:.8125rem}.article-actions .button{font-size:.9375rem}
 }
-@media(max-width:760px){.prose{font-size:1.0625rem;line-height:1.95}.prose table,.prose pre,.prose :not(pre)>code{font-size:.875rem}}
+@media(max-width:760px){.prose{font-size:1.0625rem;line-height:1.95}.prose table,.prose :not(pre)>code{font-size:.875rem}.prose pre{font-size:.8125rem}}
 @media(max-width:600px){.prose h2{font-size:22px}.prose h3{font-size:18px}.prose p{text-align:left}.article-paper .prose .headerlink{left:-16px;width:14px;font-size:.8125rem}.article-paper .prose h2 .headerlink{top:26.4px}}
