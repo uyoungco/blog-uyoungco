@@ -3,6 +3,8 @@ Thumbs.db
 db.json
 *.log
 node_modules/
+# Yarn 4 的本地安装状态由 install 自动生成，不纳入版本控制。
+.yarn/install-state.gz
 public/
 .deploy*/
 _multiconfig.yml
