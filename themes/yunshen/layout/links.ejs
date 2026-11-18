@@ -1,0 +1,19 @@
+<div class="wrap inner-page">
+  <%- partial('_partial/page-heading', {title: page.title, seal: '同游', description: '云过千山，见字如面。循着墨香，去拜访远方的朋友。'}) %>
+  <% if (theme.links.length) { %>
+  <%# 复用栏目卡片的响应式布局，整张卡片作为站点链接。 %>
+  <div class="taxonomy-grid">
+    <% theme.links.forEach(link => { %>
+    <a class="taxonomy-card" href="<%= link.url %>" target="_blank" rel="noopener noreferrer">
+      <div class="friend-card-copy">
+        <h2><%= link.name %></h2>
+        <p><%= link.description %></p>
+      </div>
+      <span aria-hidden="true">↗</span>
+    </a>
+    <% }); %>
+  </div>
+  <% } else { %>
+  <div class="empty-state"><p>暂未收录友链</p></div>
+  <% } %>
+</div>

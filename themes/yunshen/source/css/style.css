@@ -268,10 +268,11 @@ svg{display:block}
 .pagination .page-note{flex-basis:100%;text-align:center;color:var(--ink-mute);font-size:0.875rem;letter-spacing:2px;margin-top:10px}
 /* 卷末以淡墨山景承接正文，独立层叠避免背景遮住链接或扩大全站 SVG 的影响范围。 */
 .site-footer{position:relative;isolation:isolate;overflow:hidden;padding:140px 0 32px;background:linear-gradient(180deg,var(--paper) 20%,var(--paper-2))}
-.footer-landscape{position:absolute;inset:0 0 auto;height:360px;z-index:-1;pointer-events:none}
-.footer-mountains{width:100%;height:100%;mask-image:linear-gradient(transparent,#000 22%,#000 72%,transparent)}
+/* 水墨贴齐页脚底边，上缘渐入纸色，山脚保留淡墨。 */
+.footer-landscape{position:absolute;inset:auto 0 0;height:260px;z-index:-1;pointer-events:none}
+.footer-mountains{width:100%;height:100%;mask-image:linear-gradient(transparent,#000 34%)}
 .footer-mist{position:absolute;inset:38% -10% 0;background:radial-gradient(ellipse at 25% 50%,var(--paper) 0,transparent 58%),radial-gradient(ellipse at 75% 68%,var(--paper) 0,transparent 52%);opacity:.55}
-.footer-boat{position:absolute;top:175px;right:13%;width:70px;height:auto;color:var(--ink-soft);opacity:.45;stroke-width:1.1}
+.footer-boat{position:absolute;bottom:52px;right:13%;width:70px;height:auto;color:var(--ink-soft);opacity:.45;stroke-width:1.1}
 /* 移除两侧对联后改为单列，保留中央 620px 内容宽度和原有纵向间距。 */
 .footer-inner{display:grid;grid-template-columns:minmax(0,620px);gap:22px;justify-content:center;align-items:center;text-align:center}
 .footer-heading{min-width:0}
@@ -288,11 +289,12 @@ svg{display:block}
 .footer-nav a::after{content:"";position:absolute;inset:auto 9px 2px;height:1px;background:var(--gold);transform:scaleX(0);transition:transform .24s ease}
 .footer-nav a:hover::after,.footer-nav a:focus-visible::after{transform:scaleX(1)}
 .footer-social{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 24px;margin-top:18px;font:.875rem/1.8 var(--elegant);letter-spacing:1px}
-.footer-colophon{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;margin-top:18px;color:var(--ink-mute);font:.8125rem/2 var(--elegant);letter-spacing:.6px}
+/* 水墨集中在落款附近，改用正文墨色以保持小字清晰。 */
+.footer-colophon{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;margin-top:18px;color:var(--ink);font:.8125rem/2 var(--elegant);letter-spacing:.6px}
 .footer-colophon>span{white-space:nowrap}
 .footer-colophon>span+span::before{content:"·";margin-right:12px;color:var(--gold)}
 /* 备案改为无下划线的横向落款；空间不足时按整项换行，图标与文字保持对齐。 */
-.footer-records{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 22px;margin-top:10px;color:var(--ink-mute);font:.8125rem/2 var(--elegant)}
+.footer-records{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 22px;margin-top:10px;color:var(--ink);font:.8125rem/2 var(--elegant)}
 .footer-records a{display:inline-flex;align-items:center;gap:6px;max-width:100%}
 .footer-records img{flex-shrink:0;width:20px;height:20px}
 .footer-records span{min-width:0;overflow-wrap:anywhere}
@@ -332,6 +334,9 @@ svg{display:block}
 .taxonomy-tags .taxonomy-card{padding:19px;gap:10px}
 .taxonomy-tags .taxonomy-card h2{font-size:1.125rem}
 .taxonomy-tags .taxonomy-index{font:italic 22px Georgia,serif}
+/* 简介与站名共用可换行的文字区，为外链箭头留出空间。 */
+.friend-card-copy{flex:1;min-width:0}
+.friend-card-copy p{font-size:.875rem;color:var(--ink-mute);overflow-wrap:anywhere}
 .back-link{margin-bottom:10px;color:var(--gold-ink);font-size:1rem}
 .empty-state{text-align:center;padding:70px 20px}
 .empty-state>span{font:70px var(--brush);color:var(--gold-ink);opacity:.6}
@@ -416,7 +421,9 @@ svg{display:block}
   .home-post-list .post-row{grid-template-columns:40px minmax(0,1fr);gap:14px;padding:22px 0}.home-post-list .row-number{font-size:26px}.home-post-list .row-go{display:none}
   .sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:25px;margin-top:40px;padding-top:25px;border-top:1px solid var(--line)}.sidebar-section{margin-bottom:0}.sidebar-section:first-child{grid-column:1/-1}.sidebar .quote-panel{grid-row:2/4;grid-column:2;padding:18px 14px}.sidebar .quote-panel blockquote p{font-size:1.0625rem;letter-spacing:1px}.panel-heading{font-size:1.125rem}.panel-heading small{font-size:.8125rem}.tag-cloud{gap:7px}.tag-cloud a{font-size:.8125rem;padding:6px 8px}.author-card{grid-column:1/-1;padding:25px 25px 0}.author-card p{font-size:.9375rem}.sidebar-search,.category-list a,.author-card .text-link,.quote-refresh{font-size:.9375rem}.quote-panel cite{font-size:.8125rem}
   /* 手机各区自然增高，窄屏不靠压缩字号容纳内容。 */
-  .site-footer{padding:105px 0 27px}.footer-landscape{height:250px}.footer-boat{top:79px;right:12%;width:48px}
+  .site-footer{padding:105px 0 27px}.footer-landscape{height:160px}
+  /* 小舟移到左下角，避开右侧的回顶按钮和居中的备案文字。 */
+  .footer-boat{bottom:10px;right:auto;left:12px;width:38px}
   .footer-inner{display:flex;flex-direction:column;gap:20px}.footer-heading{width:100%}.footer-kicker{margin-bottom:9px}
   .footer-brand{font-size:2.25rem;gap:14px;letter-spacing:3px}.footer-brand .seal{width:26px;height:33px;font-size:.875rem}
   .footer-description{max-width:380px;font-size:.875rem;letter-spacing:1px}.footer-note{font-size:.8125rem;letter-spacing:1px}

@@ -4,7 +4,11 @@ menu:
   - { name: 藏经阁, plain: 归档, path: /archives/ }
   - { name: 万象, plain: 标签, path: /tags/ }
   - { name: 分门, plain: 分类, path: /categories/ }
+  - { name: 云游, plain: 友链, path: /links/ }
   - { name: 洞府, plain: 关于, path: /about/ }
+
+# 云游读取站点的友链配置，主题默认不预置站点。
+links: []
 
 brand:
   seal: 云深

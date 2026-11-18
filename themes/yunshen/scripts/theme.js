@@ -77,13 +77,15 @@ hexo.extend.generator.register('yunshen-pages', function (locals) {
   }];
   // 用户已有同路径页面时，保留其 Markdown 内容与 front matter。
   const existing = new Set(locals.pages.toArray().map(page => page.path));
-  for (const [path, kind, title] of [
-    [`${hexo.config.tag_dir}/index.html`, 'tags', '万象'],
-    [`${hexo.config.category_dir}/index.html`, 'categories', '分门'],
+  // 分类和标签共用模板，云游等独立页面使用各自的布局。
+  for (const [path, kind, title, layout = kind] of [
+    [`${hexo.config.tag_dir}/index.html`, 'tags', '万象', 'taxonomy'],
+    [`${hexo.config.category_dir}/index.html`, 'categories', '分门', 'taxonomy'],
+    ['links/index.html', 'links', '云游'],
     ['about/index.html', 'about', '洞府'],
     ['404.html', '404', '山径未至']
   ]) {
-    if (!existing.has(path)) routes.push({ path, layout: kind === '404' ? '404' : kind === 'about' ? 'about' : 'taxonomy', data: { title, kind } });
+    if (!existing.has(path)) routes.push({ path, layout, data: { title, kind } });
   }
   return routes;
 });
