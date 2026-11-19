@@ -128,10 +128,23 @@
       // 按本地公历日期缓存农历换算；以当地中午探测大小月，避开夏令时边界。
       const date = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
       if (lunarCalendar && date !== calendarDate) {
-        calendarDate = date;
-        lunarDay = Number(lunarCalendar.formatToParts(now).find(part => part.type === 'day').value);
-        const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 30 - lunarDay, 12);
-        monthLength = Number(lunarCalendar.formatToParts(end).find(part => part.type === 'day').value) === 30 ? 30 : 29;
+        // 部分 WebView 能创建农历格式化器，但无法返回有效日期。此时用完整月轮继续初始化页面。
+        try {
+          const dayOfMonth = Number(lunarCalendar.formatToParts(now).find(part => part.type === 'day')?.value);
+          if (!Number.isInteger(dayOfMonth) || dayOfMonth < 1 || dayOfMonth > 30) {
+            throw new RangeError('Invalid lunar day');
+          }
+          const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 30 - dayOfMonth, 12);
+          const lastDay = Number(lunarCalendar.formatToParts(end).find(part => part.type === 'day')?.value);
+          if (!Number.isInteger(lastDay) || lastDay < 1 || lastDay > 30) {
+            throw new RangeError('Invalid lunar month');
+          }
+          lunarDay = dayOfMonth;
+          monthLength = lastDay === 30 ? 30 : 29;
+          calendarDate = date;
+        } catch {
+          lunarCalendar = undefined;
+        }
       }
 
       // 月龄是日历近似：外侧半圆与椭圆明暗交界组合，保留上下半月相反的受光方向。
@@ -187,7 +200,7 @@
     setTimeout(() => { root.classList.add('entrance-complete'); updateAmbient(); }, 1100);
   }, { once: true });
 
-  // 卷末与页头分别观察可见性，读到页脚才播放薄雾、小舟；暂停时保留动画进度。
+  // 卷末独立控制水纹、薄雾和小舟的播放，离开视口时保留各自进度。
   const footer = document.querySelector('.site-footer');
   let footerVisible = false;
   function updateFooterAmbient() {
@@ -234,8 +247,27 @@
   const input = document.querySelector('#search-input');
   const status = document.querySelector('.search-status');
   const results = document.querySelector('.search-results');
+  const nativeSearch = typeof dialog.showModal === 'function' && typeof dialog.close === 'function';
+  let searchBackdrop;
+  let searchOrigin;
   let searchIndex;
   let indexRequest;
+
+  if (!nativeSearch) {
+    // 旧版 WebView 不提供原生模态框，使用独立遮罩并把焦点留在搜索框内。
+    dialog.classList.add('search-dialog-fallback');
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    searchBackdrop = document.createElement('div');
+    searchBackdrop.className = 'search-backdrop';
+    searchBackdrop.hidden = true;
+    searchBackdrop.setAttribute('aria-hidden', 'true');
+    dialog.before(searchBackdrop);
+    searchBackdrop.addEventListener('click', closeSearch);
+    document.addEventListener('focusin', event => {
+      if (dialog.hasAttribute('open') && !dialog.contains(event.target)) input.focus();
+    });
+  }
 
   // 按需加载并复用索引；失败后允许重试，过期的查询不会覆盖最新输入。
   async function loadIndex() {
@@ -267,7 +299,8 @@
 
   async function search() {
     const query = input.value.trim();
-    results.replaceChildren();
+    // 同一批旧版 WebView 也可能缺少 replaceChildren。
+    results.textContent = '';
     if (!query) { status.textContent = '输入篇名、正文或签引，寻一卷好文。'; return; }
     status.textContent = '循墨寻踪中…';
     try {
@@ -305,24 +338,48 @@
     }
   }
 
-  function openSearch() {
-    // 原生模态框之间不叠加；查看图片时，搜索快捷键仍被消费但不打开搜索。
+  function closeSearch() {
+    if (nativeSearch) dialog.close();
+    else {
+      dialog.removeAttribute('open');
+      searchBackdrop.hidden = true;
+      root.classList.remove('search-fallback-open');
+      searchOrigin?.focus({ preventScroll: true });
+    }
+  }
+
+  function openSearch(trigger) {
+    // 查看图片时保留当前弹窗。搜索打开前先收起页头菜单，避免菜单抢回焦点。
     if (viewer?.hasAttribute('open')) return;
     closeMenu();
-    if (!dialog.open) dialog.showModal();
+    closeThemeMenu();
+    if (!dialog.hasAttribute('open')) {
+      if (nativeSearch) dialog.showModal();
+      else {
+        searchOrigin = trigger || document.activeElement;
+        searchBackdrop.hidden = false;
+        root.classList.add('search-fallback-open');
+        dialog.setAttribute('open', '');
+      }
+    }
     input.focus();
   }
-  document.querySelectorAll('.search-trigger').forEach(button => button.addEventListener('click', openSearch));
-  document.querySelector('.search-close').addEventListener('click', () => dialog.close());
+  document.querySelectorAll('.search-trigger').forEach(button => button.addEventListener('click', () => openSearch(button)));
+  document.querySelector('.search-close').addEventListener('click', closeSearch);
   dialog.addEventListener('click', event => {
     // 点击 dialog 外的遮罩才关闭，面板内部留白不触发关闭。
     const rect = dialog.getBoundingClientRect();
-    if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) dialog.close();
+    if (event.target === dialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) closeSearch();
   });
   document.querySelector('.search-form').addEventListener('submit', event => { event.preventDefault(); search(); });
   let searchTimer;
   input.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(search, 150); });
   document.addEventListener('keydown', event => {
+    if (!nativeSearch && event.key === 'Escape' && dialog.hasAttribute('open')) {
+      event.preventDefault();
+      closeSearch();
+      return;
+    }
     const editing = event.target instanceof HTMLElement && (event.target.matches('input,textarea,select') || event.target.isContentEditable);
     if (!editing && (event.key === '/' || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k'))) {
       event.preventDefault();

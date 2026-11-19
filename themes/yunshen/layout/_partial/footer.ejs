@@ -13,10 +13,19 @@
       <path d="M-40 273C74 260 129 235 224 247S346 221 430 244 534 285 634 262 744 228 836 251 952 283 1055 260 1174 232 1262 254 1395 281 1482 258 1570 247 1640 251V400H-40Z" fill="url(#footer-near-fade)"/>
     </svg>
     <div class="footer-mist"></div>
-    <svg class="footer-boat" viewBox="0 0 90 42" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M14 26q30 9 62-2l-9 9H26Z" fill="currentColor" fill-opacity=".18"/>
-      <path d="M40 27V8m1 1q18 4 20 15H41M32 26l-9-10M8 38h25m10 0h35"/>
+    <%# 每条曲线重复一段等宽波形，连接点的高度与切线一致，循环时水纹连续。 %>
+    <svg class="footer-wave footer-wave-far" viewBox="0 0 1600 64" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 31<%= 'c52 0 86 -10 134 -10s81 14 132 14 93 -11 143 -11 96 13 149 13 78 -12 123 -12 75 6 119 6'.repeat(2) %>V64H0Z"/>
     </svg>
+    <svg class="footer-wave footer-wave-near" viewBox="0 0 1600 64" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 38<%= 'c37 0 80 -11 126 -11s90 14 147 14 78 -13 123 -13 84 13 137 13 95 -12 149 -12 84 9 118 9'.repeat(2) %>V64H0Z"/>
+    </svg>
+    <div class="footer-boat-track">
+      <svg class="footer-boat" viewBox="0 0 90 42" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 26q30 9 62-2l-9 9H26Z" fill="currentColor" fill-opacity=".18"/>
+        <path d="M40 27V8m1 1q18 4 20 15H41M32 26l-9-10M8 38h25m10 0h35"/>
+      </svg>
+    </div>
   </div>
 
   <div class="wrap footer-inner">

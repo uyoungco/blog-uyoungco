@@ -1,6 +1,7 @@
 <%# 原创 SVG 山水：分层颜色随主题令牌变化，装饰不参与交互或读屏。 %>
 <div class="landscape" aria-hidden="true">
-  <svg class="mountains" viewBox="0 0 1600 620" preserveAspectRatio="xMidYMax slice" fill="none">
+  <%# 山景在独立画幅内缩放，宽屏也保留各层山脊和上方留白。 %>
+  <svg class="mountains" viewBox="0 230 1520 390" preserveAspectRatio="none" fill="none">
     <defs>
       <%# 渐变直接引用各层令牌，避免 defs 中 currentColor 继承成正文墨色。 %>
       <linearGradient id="mount-fade" x1="800" y1="80" x2="800" y2="620" gradientUnits="userSpaceOnUse"><stop stop-color="var(--mount-far)" stop-opacity=".5"/><stop offset="1" stop-color="var(--mount-far)" stop-opacity="0"/></linearGradient>
@@ -20,6 +21,7 @@
     </g>
     <path d="M0 480h1600v140H0Z" fill="url(#mist-fade)"/>
   </svg>
+  <%- partial('_partial/sky') %>
   <%# 飞鸟保留原有线条并独立分组；单独视窗避免矮页头裁掉飞鸟，位移不会受山水缩放放大。 %>
   <svg class="birds" viewBox="820 125 140 70" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
     <g class="bird"><path d="M853 174q12-10 23 3 13-12 24-8"/></g>
