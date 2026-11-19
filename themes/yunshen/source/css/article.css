@@ -144,7 +144,7 @@ html.image-viewer-fallback-open body{position:fixed;top:var(--image-viewer-scrol
 .prose figcaption{display:block;margin-top:10px;font:0.875rem/1.8 var(--elegant);letter-spacing:.1em;color:var(--ink-mute);text-align:center}
 /* 高亮代码使用独立深色墨底，标题栏与复制按钮不遮挡代码。 */
 /* 基础代码块不依赖脚本即可滚动；增强后由内部 code-scroll 承担滚动，标题栏保持固定。 */
-.prose .highlight,.prose>pre{position:relative;max-width:100%;min-width:0;margin:1.6em 0;border-radius:6px;overflow-x:auto;background:#151d22;border:1px solid #26323b;box-shadow:var(--article-shadow);letter-spacing:0;color:#e3ddd0;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.prose .highlight,.prose>pre{--code-block-bg:#151d22;position:relative;max-width:100%;min-width:0;margin:1.6em 0;border-radius:6px;overflow-x:auto;background:var(--code-block-bg);border:1px solid #26323b;box-shadow:var(--article-shadow);letter-spacing:0;color:#e3ddd0;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .prose .code-toolbar{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:8px 16px;border-bottom:1px solid #26323b;background:#1a242a;margin:0;text-align:left}
 .code-language{font:0.8125rem/1.8 var(--mono);letter-spacing:.1em;color:#cdb07a;text-transform:lowercase}
 .code-language::before{content:"◆ ";color:#e0674f;font-size:9px;vertical-align:2px}
@@ -153,12 +153,14 @@ html.image-viewer-fallback-open body{position:fixed;top:var(--image-viewer-scrol
 .prose pre{font:0.9375rem/1.75 var(--mono);color:#e3ddd0;padding:18px 20px;margin:0;overflow-x:auto;white-space:pre;overflow-wrap:normal;word-break:normal;letter-spacing:0;tab-size:2;text-align:left}
 .prose pre code{font:inherit;color:inherit;letter-spacing:0;background:none;border:0;padding:0;margin:0}
 .prose .code-scroll{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#7e6a45 transparent}
-.prose .highlight table{display:table;width:100%;font:inherit;border:0;margin:0}
+/* 独立边框随行号列一起固定，零间距保留两列原有的对齐。 */
+.prose .highlight table{display:table;width:100%;font:inherit;border:0;border-collapse:separate;border-spacing:0;margin:0}
 .prose .highlight tbody{border:0}
 .prose .highlight :is(td,th){padding:0;border:0;background:none;vertical-align:top}
-.prose .highlight tbody tr:hover td{background:none}
+.prose .highlight tbody tr:hover td:not(.gutter){background:none}
 .prose .highlight pre{overflow:visible}
-.prose .highlight .gutter{width:1px;user-select:none;color:#97a4a5;border-right:1px solid #26323b}
+/* 横向滚动时把行号留在左沿，实色墨底遮住从下方滑过的代码。 */
+.prose .highlight .gutter{position:sticky;left:0;z-index:1;width:1px;user-select:none;color:#97a4a5;background:var(--code-block-bg);border-right:1px solid #26323b}
 .prose .highlight .gutter pre{color:#97a4a5;padding-left:14px;padding-right:12px}
 .prose .highlight .code{width:100%}
 .prose .highlight .comment,.prose .highlight .quote{color:#82958e;font-style:italic}

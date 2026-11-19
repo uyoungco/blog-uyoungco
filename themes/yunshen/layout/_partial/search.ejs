@@ -1,6 +1,21 @@
 <dialog class="search-dialog" id="search-dialog" aria-labelledby="search-title" data-index="<%- url_for('/search.json') %>">
-  <div class="search-dialog-head"><h2 id="search-title">循字寻踪 <small>搜索文章</small></h2><button class="icon-button search-close" type="button" aria-label="关闭搜索"><%- yun_icon('close') %></button></div>
-  <form class="search-form" role="search"><label class="sr-only" for="search-input">文章标题、正文或标签</label><%- yun_icon('search') %><input type="search" id="search-input" placeholder="一字一词，皆有回响…" autocomplete="off"><kbd>ESC</kbd></form>
-  <p class="search-status" role="status" aria-live="polite">输入篇名、正文或签引，寻一卷好文。</p><ol class="search-results"></ol>
-  <div class="search-dialog-foot">字里行间，总有相逢。<span>云深处 · 寻踪</span></div>
+  <div class="search-dialog-head">
+    <div class="search-dialog-title">
+      <h2 id="search-title">搜索文章</h2>
+      <span aria-hidden="true">循字寻踪</span>
+    </div>
+    <button class="icon-button search-close" type="button" aria-label="关闭搜索" aria-keyshortcuts="Escape">
+      <kbd aria-hidden="true">Esc</kbd><%- yun_icon('close') %>
+    </button>
+  </div>
+  <form class="search-form" role="search">
+    <%# 整个输入区域都可点击聚焦，关闭提示移到对应按钮旁。 %>
+    <label class="search-field" for="search-input">
+      <span class="sr-only">搜索关键词</span>
+      <%- yun_icon('search') %>
+      <input type="search" id="search-input" placeholder="输入关键词" autocomplete="off">
+    </label>
+  </form>
+  <p class="search-status" role="status" aria-live="polite">可搜索标题、正文、分类和标签</p>
+  <ol class="search-results"></ol>
 </dialog>

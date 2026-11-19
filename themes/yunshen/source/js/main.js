@@ -246,6 +246,7 @@
   const viewer = document.querySelector('#image-viewer');
   const input = document.querySelector('#search-input');
   const status = document.querySelector('.search-status');
+  const searchHint = status.textContent;
   const results = document.querySelector('.search-results');
   const nativeSearch = typeof dialog.showModal === 'function' && typeof dialog.close === 'function';
   let searchBackdrop;
@@ -301,8 +302,8 @@
     const query = input.value.trim();
     // 同一批旧版 WebView 也可能缺少 replaceChildren。
     results.textContent = '';
-    if (!query) { status.textContent = '输入篇名、正文或签引，寻一卷好文。'; return; }
-    status.textContent = '循墨寻踪中…';
+    if (!query) { status.textContent = searchHint; return; }
+    status.textContent = '正在搜索…';
     try {
       const posts = await loadIndex();
       if (input.value.trim() !== query) return;
@@ -314,7 +315,7 @@
         const haystack = `${title} ${labels} ${text}`;
         return { post, score: words.every(word => haystack.includes(word)) ? words.reduce((score, word) => score + (title.includes(word) ? 4 : 0) + (labels.includes(word) ? 2 : 0) + 1, 0) : 0 };
       }).filter(match => match.score).sort((a, b) => b.score - a.score);
-      status.textContent = matches.length ? `寻得 ${matches.length} 篇文字${matches.length > 30 ? '，先呈前 30 篇' : ''}。` : '未寻得相应文字，试试另一个词。';
+      status.textContent = matches.length ? `找到 ${matches.length} 篇文章${matches.length > 30 ? '（显示前 30 篇）' : ''}` : '未找到相关文章，试试其他关键词';
       const fragment = document.createDocumentFragment();
       matches.slice(0, 30).forEach(({ post }) => {
         const li = document.createElement('li');
@@ -328,13 +329,14 @@
         snippet.append(highlighted(`${start ? '…' : ''}${post.text.slice(start, start + 110)}${post.text.length > start + 110 ? '…' : ''}`, words));
         const meta = document.createElement('small');
         meta.textContent = `${post.date} · ${post.categories.join(' / ') || '随笔'}`;
-        link.append(meta, heading, snippet);
+        // 扫描结果时先读标题，日期、分类和摘要随后提供上下文。
+        link.append(heading, meta, snippet);
         li.append(link);
         fragment.append(li);
       });
       results.append(fragment);
     } catch {
-      if (input.value.trim() === query) status.textContent = '暂时未能取到卷目，请检查网络后重新输入。';
+      if (input.value.trim() === query) status.textContent = '搜索索引加载失败，请检查网络后重试';
     }
   }
 
